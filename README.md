@@ -2,7 +2,7 @@
 
 Empowering senior citizens through inclusive, innovative wellness programs using user-centered design principles to enhance social, emotional, and physical well-being.
 
-![Yarm Wellness Centre](https://via.placeholder.com/800x300.png?text=Yarm+Wellness+Centre)  
+![Yarm Wellness Centre]()  
 *Inclusive Wellness Initiatives for Seniors*
 
 ---
