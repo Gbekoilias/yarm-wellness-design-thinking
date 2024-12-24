@@ -2,7 +2,7 @@
 
 Empowering senior citizens through inclusive, innovative wellness programs using user-centered design principles to enhance social, emotional, and physical well-being.
 
-![Yarm Wellness Centre]()  
+![Yarm Wellness Centre](https://github.com/Gbekoilias/yarm-wellness-design-thinking/blob/094fcadfad4874225cbeb1437e94a0dbbbbe82e7/images/main/Yam%20Wellness%20Centre%20-%20Pic1.png)  
 *Inclusive Wellness Initiatives for Seniors*
 
 ---
@@ -11,6 +11,7 @@ Empowering senior citizens through inclusive, innovative wellness programs using
 
 Yarm Wellness Centre leverages design thinking to create impactful programs addressing the unique wellness needs of senior citizens. This repository outlines the conceptualisation, ideation, prototyping, and testing of three inclusive wellness programs:
 
+![Yarm Wellness Centre 2](https://github.com/Gbekoilias/yarm-wellness-design-thinking/blob/094fcadfad4874225cbeb1437e94a0dbbbbe82e7/images/main/Yam%20Wellness%20Centre%20-%20Pic2.png)  
 1. **Watch and Connect** - Aimed at reducing social isolation in older men through shared experiences like football viewing.
 2. **Companion Program** - Designed to foster emotional connections for older women through one-on-one companionship.
 3. **Wellness Workshops** - Gender-neutral hybrid sessions promoting holistic health with topics like yoga, mindfulness, and nutrition.
@@ -28,21 +29,21 @@ Yarm Wellness Centre leverages design thinking to create impactful programs addr
 ## 📖 Program Details
 
 ### 1. Watch and Connect
-![Watch and Connect](https://via.placeholder.com/600x300.png?text=Watch+and+Connect+for+Men)
+![Watch and Connect](https://github.com/Gbekoilias/yarm-wellness-design-thinking/blob/094fcadfad4874225cbeb1437e94a0dbbbbe82e7/images/program_details/watch%20and%20connect.png)
 - **Target Audience:** Older men
 - **Activities:** Shared experiences via live football games.
 - **Key Features:** Free transportation, refreshments, and barrier-free venues.
 - **Outcomes:** Builds social connections and emotional well-being.
 
 ### 2. Companion Program
-![Companion Program](https://via.placeholder.com/600x300.png?text=Companion+Program+for+Women)
+![Companion Program](https://github.com/Gbekoilias/yarm-wellness-design-thinking/blob/094fcadfad4874225cbeb1437e94a0dbbbbe82e7/images/program_details/companion%20program.png)
 - **Target Audience:** Older women
 - **Activities:** One-on-one companionship through shared activities like walking or crafts.
 - **Key Features:** Gender-sensitive design and volunteer support.
 - **Outcomes:** Reduces loneliness and enhances a sense of purpose.
 
 ### 3. Wellness Workshops
-![Wellness Workshops](https://via.placeholder.com/600x300.png?text=Wellness+Workshops+for+All+Genders)
+![Wellness Workshops](https://github.com/Gbekoilias/yarm-wellness-design-thinking/blob/094fcadfad4874225cbeb1437e94a0dbbbbe82e7/images/program_details/wellness%20workshop.png)
 - **Target Audience:** All genders
 - **Activities:** Yoga, mindfulness, and healthy eating workshops.
 - **Key Features:** Hybrid format (in-person and online), monthly sessions.
@@ -88,8 +89,8 @@ Yarm Wellness Centre leverages design thinking to create impactful programs addr
 
 ## 🖼️ Gallery
 
-![Event 1](https://via.placeholder.com/400x200.png?text=Event+1)  
-![Event 2](https://via.placeholder.com/400x200.png?text=Event+2)  
+![Event 1](https://github.com/Gbekoilias/yarm-wellness-design-thinking/blob/094fcadfad4874225cbeb1437e94a0dbbbbe82e7/images/gallery/gallery1.png)  
+![Event 2](https://github.com/Gbekoilias/yarm-wellness-design-thinking/blob/094fcadfad4874225cbeb1437e94a0dbbbbe82e7/images/gallery/gallery2.png)  
 
 ---
 
