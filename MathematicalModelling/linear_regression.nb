@@ -1,0 +1,168 @@
+(* Import necessary packages *)
+Needs["ErrorBarPlots`"]
+Needs["HypothesisTesting`"]
+
+(* Data Import and Preprocessing *)
+data = Import["data.csv"];
+dataMatrix = ToExpression[Rest[data]]; (* Convert strings to numbers and remove headers *)
+
+(* Extract x and y variables *)
+xData = dataMatrix[[All, 1]];
+yData = dataMatrix[[All, 2]];
+xyPairs = Transpose[{xData, yData}];
+
+(* Basic Linear Regression *)
+model = LinearModelFit[xyPairs, x, x];
+
+(* Model Summary Statistics *)
+modelSummary = {
+  "R-Squared" -> model["RSquared"],
+  "Adjusted R-Squared" -> model["AdjustedRSquared"],
+  "F-Statistic" -> model["FStatistic"],
+  "P-Value" -> model["ANOVATable"]["PValue"][[1]],
+  "Standard Error" -> model["EstimatedVariance"]^0.5,
+  "AIC" -> model["AIC"],
+  "BIC" -> model["BIC"]
+};
+
+(* Parameter Estimates *)
+parameterTable = model["ParameterTable"];
+
+(* Residual Analysis *)
+residuals = model["FitResiduals"];
+standardizedResiduals = model["StandardizedResiduals"];
+leverages = model["Leverage"];
+cookDistances = model["CookDistances"];
+
+(* Diagnostic Plots *)
+diagnosticPlots = {
+  (* Actual vs Predicted Plot *)
+  Show[
+    ListPlot[Transpose[{model["PredictedResponse"], yData}], 
+      PlotStyle -> {PointSize[0.015], Blue},
+      PlotLabel -> "Actual vs Predicted",
+      AxesLabel -> {"Predicted", "Actual"}],
+    Plot[x, {x, Min[yData], Max[yData]}, 
+      PlotStyle -> {Red, Dashed}]
+  ],
+  
+  (* Residual Plot *)
+  ListPlot[Transpose[{xData, standardizedResiduals}],
+    PlotStyle -> {PointSize[0.015], Blue},
+    PlotLabel -> "Standardized Residuals vs X",
+    AxesLabel -> {"X", "Standardized Residuals"},
+    GridLines -> {{}, {-2, 0, 2}},
+    GridLinesStyle -> Directive[Gray, Dashed]
+  ],
+  
+  (* Q-Q Plot *)
+  Normal@QuantilePlot[standardizedResiduals,
+    PlotLabel -> "Normal Q-Q Plot",
+    AxesLabel -> {"Theoretical Quantiles", "Sample Quantiles"}
+  ],
+  
+  (* Cook's Distance Plot *)
+  ListPlot[cookDistances,
+    PlotStyle -> {PointSize[0.015], Blue},
+    PlotLabel -> "Cook's Distance",
+    AxesLabel -> {"Observation", "Cook's Distance"},
+    GridLines -> {{}, {4/Length[xData]}},
+    GridLinesStyle -> Directive[Red, Dashed]
+  ]
+};
+
+(* Confidence and Prediction Intervals *)
+confidenceBands = model["MeanPredictionBands", ConfidenceLevel -> 0.95];
+predictionBands = model["SinglePredictionBands", ConfidenceLevel -> 0.95];
+
+(* Plot with Confidence and Prediction Bands *)
+regressionPlot = Show[
+  ListPlot[xyPairs, PlotStyle -> {PointSize[0.015], Blue}],
+  Plot[{
+    model[x],
+    confidenceBands[[1]], confidenceBands[[2]],
+    predictionBands[[1]], predictionBands[[2]]
+    },
+    {x, Min[xData], Max[xData]},
+    PlotStyle -> {
+      {Black, Thick},
+      {Red, Dashed}, {Red, Dashed},
+      {Green, Dashed}, {Green, Dashed}
+    }
+  ],
+  PlotLabel -> "Regression with Confidence and Prediction Bands",
+  AxesLabel -> {"X", "Y"}
+];
+
+(* Export Results *)
+results = {
+  "Model Summary" -> modelSummary,
+  "Parameter Estimates" -> parameterTable,
+  "Equation" -> model["BestFit"],
+  "ANOVA Table" -> model["ANOVATable"]
+};
+
+Export["regression_results.txt", 
+  TableForm[results, 
+    TableHeadings -> {None, {"Statistic", "Value"}}]
+];
+
+(* Export Plots *)
+Export["diagnostic_plots.pdf", GraphicsGrid[Partition[diagnosticPlots, 2]]];
+Export["regression_plot.pdf", regressionPlot];
+
+(* Hypothesis Testing *)
+tTests = model["ParameterTableEntries"];
+fTest = model["ANOVATable"];
+
+(* Model Validation *)
+(* Cross Validation *)
+crossValidation = Table[
+  randomIndices = RandomSample[Range[Length[xyPairs]], Round[0.8*Length[xyPairs]]];
+  trainingData = xyPairs[[randomIndices]];
+  testData = xyPairs[[Complement[Range[Length[xyPairs]], randomIndices]]];
+  
+  validationModel = LinearModelFit[trainingData, x, x];
+  predictions = validationModel["PredictedResponse" /. x -> #[[1]]]& /@ testData;
+  actualValues = testData[[All, 2]];
+  
+  Mean[(predictions - actualValues)^2],
+  {5}
+];
+
+(* Output Cross Validation Results *)
+crossValidationResults = {
+  "Mean MSE" -> Mean[crossValidation],
+  "Standard Deviation MSE" -> StandardDeviation[crossValidation]
+};
+
+(* Model Diagnostics Summary *)
+diagnosticSummary = {
+  "Residual Normality" -> AndersonDarlingTest[residuals],
+  "Homoscedasticity" -> BreuschPaganTest[model],
+  "Autocorrelation" -> DurbinWatsonTest[residuals]
+};
+
+(* Print Interactive Model Explorer *)
+Manipulate[
+  Show[
+    ListPlot[xyPairs, PlotStyle -> {PointSize[0.015], Blue}],
+    Plot[model[x], {x, Min[xData], Max[xData]},
+      PlotStyle -> {Red, Thick}],
+    If[showConfidence,
+      Plot[confidenceBands, {x, Min[xData], Max[xData]},
+        PlotStyle -> {Orange, Dashed}],
+      {}
+    ],
+    If[showPrediction,
+      Plot[predictionBands, {x, Min[xData], Max[xData]},
+        PlotStyle -> {Green, Dashed}],
+      {}
+    ],
+    PlotRange -> All,
+    PlotLabel -> "Interactive Regression Explorer",
+    AxesLabel -> {"X", "Y"}
+  ],
+  {{showConfidence, False, "Show Confidence Bands"}, {True, False}},
+  {{showPrediction, False, "Show Prediction Bands"}, {True, False}}
+]

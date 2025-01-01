@@ -1,0 +1,186 @@
+(* Import required packages *)
+Needs["HypothesisTesting`"]
+Needs["ErrorBarPlots`"]
+
+(* Data Import and Initial Processing *)
+data = Import["data.csv"];
+numericData = ToExpression[Rest[data]];  (* Convert strings to numbers and remove headers *)
+headers = First[data];
+
+(* Basic Summary Statistics Function *)
+computeSummaryStats[column_] := {
+  "Mean" -> Mean[column],
+  "Median" -> Median[column],
+  "StandardDeviation" -> StandardDeviation[column],
+  "Variance" -> Variance[column],
+  "Skewness" -> Skewness[column],
+  "Kurtosis" -> Kurtosis[column],
+  "Q1" -> Quartiles[column][[1]],
+  "Q3" -> Quartiles[column][[3]],
+  "IQR" -> InterquartileRange[column],
+  "Min" -> Min[column],
+  "Max" -> Max[column],
+  "Range" -> Max[column] - Min[column]
+};
+
+(* Compute summary statistics for each numeric column *)
+columnStats = Table[
+  {headers[[i]], computeSummaryStats[numericData[[All, i]]]},
+  {i, Length[headers]}
+];
+
+(* Correlation Analysis *)
+correlationMatrix = Correlation[numericData];
+correlationPlot = MatrixPlot[correlationMatrix,
+  ColorFunction -> "TemperatureMap",
+  PlotLabel -> "Correlation Matrix",
+  FrameTicks -> {headers, headers}
+];
+
+(* Distribution Analysis *)
+distributionPlots = Table[
+  Column[{
+    headers[[i]],
+    Histogram[numericData[[All, i]],
+      PlotLabel -> "Distribution",
+      AxesLabel -> {"Value", "Frequency"}
+    ],
+    BoxWhiskerChart[numericData[[All, i]],
+      PlotLabel -> "Box Plot"
+    ]
+  }],
+  {i, Length[headers]}
+];
+
+(* Normality Tests *)
+normalityTests = Table[
+  {headers[[i]], 
+   "Anderson-Darling" -> AndersonDarlingTest[numericData[[All, i]]],
+   "Shapiro-Wilk" -> ShapiroWilkTest[numericData[[All, i]]]},
+  {i, Length[headers]}
+];
+
+(* Time Series Analysis (if applicable) *)
+timeSeriesAnalysis[column_] := Module[{ts = TimeSeries[column]},
+  {
+    "Trend" -> FindCurveFit[Range[Length[column]], column, x, x],
+    "Seasonality" -> Fourier[column, 2],
+    "Autocorrelation" -> CorrelationFunction[column, {1, 10}]
+  }
+];
+
+(* Outlier Detection *)
+findOutliers[column_] := Module[
+  {q1 = Quartiles[column][[1]], 
+   q3 = Quartiles[column][[3]], 
+   iqr = InterquartileRange[column]},
+  Select[column, # < q1 - 1.5*iqr || # > q3 + 1.5*iqr &]
+];
+
+outlierSummary = Table[
+  {headers[[i]], findOutliers[numericData[[All, i]]]},
+  {i, Length[headers]}
+];
+
+(* Statistical Tests *)
+performTTests[column_] := {
+  "One-Sample t-test" -> OneSampleTTest[column],
+  "Normality" -> ShapiroWilkTest[column]
+};
+
+tTestResults = Table[
+  {headers[[i]], performTTests[numericData[[All, i]]]},
+  {i, Length[headers]}
+];
+
+(* Visualization Functions *)
+createScatterMatrix[] := Module[{},
+  Grid[Table[
+    If[i === j,
+      Histogram[numericData[[All, i]], 10],
+      ListPlot[
+        Transpose[{numericData[[All, i]], numericData[[All, j]]}],
+        PlotStyle -> PointSize[0.02]
+      ]
+    ],
+    {i, Length[headers]}, {j, Length[headers]}
+  ]]
+];
+
+(* Interactive Data Explorer *)
+dataExplorer = Manipulate[
+  Column[{
+    (* Summary Statistics *)
+    Grid[{
+      {"Statistic", "Value"},
+      {"Mean", Mean[numericData[[All, column]]]},
+      {"Median", Median[numericData[[All, column]]]},
+      {"StdDev", StandardDeviation[numericData[[All, column]]]}
+    }],
+    
+    (* Distribution Plot *)
+    Show[
+      Histogram[numericData[[All, column]], 
+        PlotLabel -> headers[[column]]],
+      If[showNormalCurve,
+        Plot[
+          PDF[NormalDistribution[
+            Mean[numericData[[All, column]]], 
+            StandardDeviation[numericData[[All, column]]]
+          ], x] * Length[numericData[[All, column]]] * binWidth,
+          {x, Min[numericData[[All, column]]], Max[numericData[[All, column]]]}
+        ],
+        {}
+      ]
+    ],
+    
+    (* Box Plot *)
+    If[showBoxPlot,
+      BoxWhiskerChart[numericData[[All, column]]],
+      {}
+    ]
+  }],
+  {{column, 1, "Select Column"}, Table[i -> headers[[i]], {i, Length[headers]}]},
+  {{binWidth, (Max[numericData[[All, 1]]] - Min[numericData[[All, 1]]]) / 20, "Bin Width"}, 0.1, 10},
+  {{showNormalCurve, False, "Show Normal Curve"}, {True, False}},
+  {{showBoxPlot, False, "Show Box Plot"}, {True, False}}
+];
+
+(* Export Results *)
+Export["statistical_analysis.txt",
+  {
+    "Summary Statistics" -> columnStats,
+    "Correlation Analysis" -> correlationMatrix,
+    "Normality Tests" -> normalityTests,
+    "Outlier Summary" -> outlierSummary,
+    "T-Test Results" -> tTestResults
+  }
+];
+
+(* Export Visualizations *)
+Export["correlation_plot.pdf", correlationPlot];
+Export["distribution_plots.pdf", GraphicsGrid[Partition[distributionPlots, 2]]];
+Export["scatter_matrix.pdf", createScatterMatrix[]];
+
+(* Interactive Report Generation *)
+CreateDocument[{
+  Cell["Statistical Analysis Report", "Title"],
+  
+  Cell["Summary Statistics", "Section"],
+  Cell[BoxData[TableForm[columnStats]], "Output"],
+  
+  Cell["Correlation Analysis", "Section"],
+  Cell[BoxData[correlationPlot], "Output"],
+  
+  Cell["Distribution Analysis", "Section"],
+  Cell[BoxData[GraphicsGrid[Partition[distributionPlots, 2]]], "Output"],
+  
+  Cell["Normality Tests", "Section"],
+  Cell[BoxData[TableForm[normalityTests]], "Output"],
+  
+  Cell["Outlier Analysis", "Section"],
+  Cell[BoxData[TableForm[outlierSummary]], "Output"],
+  
+  Cell["Interactive Data Explorer", "Section"],
+  Cell[BoxData[dataExplorer], "Output"]
+}]
